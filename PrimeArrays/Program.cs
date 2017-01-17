@@ -16,12 +16,19 @@ namespace PrimeArrays
         {
             Console.Write("Enter maximum prime number: ");
             var maxPrime = Convert.ToInt32(Console.ReadLine());
-            var primeArray = CreatePrimeArray(maxPrime);
+
             var sw = new Stopwatch();
+            var primeArray = CreatePrimeArray(maxPrime);
             sw.Start();
             RemoveNonPrimes(primeArray);
-            Console.WriteLine($"Complete in {sw.ElapsedMilliseconds} ms.");
+            Console.WriteLine($"Prime array complete in {sw.ElapsedMilliseconds} ms.");
 
+            sw.Reset();
+            sw.Start();
+            CalculatePrimesAlternative(maxPrime);
+            Console.WriteLine($"Alternative method complete in {sw.ElapsedMilliseconds} ms.");
+
+            
             var fileName = "primes.csv";
 
             Console.Write("Saving to file ...");
@@ -87,18 +94,39 @@ namespace PrimeArrays
             {
                 if (array[i])
                 {
-                    //Console.WriteLine($"Prime: {i}");
-
-                    //sw.Reset();
-                    //sw.Start();
-                    //Console.Write($"Removing factors for {i} ...");
-
                     RemoveFactors(i, array);
-                    //RemoveFactorsParallel(i, array);
-
-                    //Console.WriteLine($"done [{sw.ElapsedMilliseconds} ms]");
                 }
             }
+        }
+
+        static List<int> CalculatePrimesAlternative(int number)
+        {
+            int Until = number;
+            BitArray PrimeBits = new BitArray(Until, true);
+
+            /*
+             * Sieve of Eratosthenes
+             * PrimeBits is a simple BitArray where all bit is an integer
+             * and we mark composite numbers as false
+             */
+
+            PrimeBits.Set(0, false); // You don't actually need this, just
+            PrimeBits.Set(1, false); // remindig you that 2 is the smallest prime
+
+            for (int P = 2; P < (int)Math.Sqrt(Until) + 1; P++)
+                if (PrimeBits.Get(P))
+                    // These are going to be the multiples of P if it is a prime
+                    for (int PMultiply = P * 2; PMultiply < Until; PMultiply += P)
+                        PrimeBits.Set(PMultiply, false);
+
+            // We use this to store the actual prime numbers
+            var Primes = new List<int>();
+
+            for (int i = 2; i < Until; i++)
+                if (PrimeBits.Get(i))
+                    Primes.Add(i);
+
+            return Primes;
         }
     }
 }
